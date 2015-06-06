@@ -1,7 +1,7 @@
 {
   "name": "sql-parser",
   "description": "Lexer and Parser for SQL Syntax",
-  "version": "0.5.0",
+  "version": "1.0.0",
   "scripts": {
     "test": "./node_modules/.bin/cake build && ./node_modules/.bin/mocha --require should --compilers coffee:coffee-script/register"
   },
@@ -12,8 +12,12 @@
   "directories": {
     "lib" : "./lib"
   },
-  "dependencies": {
-  },
+  "keywords": [
+    "sql",
+    "lexer",
+    "parser",
+    "ast"
+  ],
   "devDependencies": {
     "jison": "0.4.15",
     "coffee-script": "1.8.0",
@@ -25,6 +29,6 @@
   ],
   "repository": {
     "type": "git",
-    "url": "http://github.com/forward/sql-parser.git"
+    "url": "http://github.com/mistic100/sql-parser.git"
   }
 }
