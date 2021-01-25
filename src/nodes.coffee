@@ -51,25 +51,42 @@ exports.LiteralValue = class LiteralValue
       @nested = false
       @values = [@value]
   # TODO: Backtick quotes only supports MySQL, Postgres uses double-quotes
-  toString: -> "`#{@values.join('.')}`"
+  toString: (quote=true) ->
+    if quote
+      "`#{@values.join('`.`')}`"
+    else
+      "#{@values.join('.')}"
 
 exports.StringValue = class StringValue
   constructor: (@value, @quoteType="''") -> null
-  toString: -> "#{@quoteType}#{@value}#{@quoteType}"
+  toString: ->
+    escaped = if @quoteType is "'" then @value.replace /(^|[^\\])'/g, "$1''" else @value
+    "#{@quoteType}#{escaped}#{@quoteType}"
 
-exports.NumberValue = class LiteralValue
+exports.NumberValue = class NumberValue
   constructor: (value) -> @value = Number(value)
   toString: -> @value.toString()
 
 exports.ListValue = class ListValue
-  constructor: (value) -> @value = value
+  constructor: (@value) -> null
   toString: -> "(#{@value.join(', ')})"
+
+exports.WhitepaceList = class WhitepaceList
+  constructor: (@value) -> null
+  toString: ->
+    # not backtick for literals
+    @value.map (value) ->
+      if value instanceof exports.LiteralValue
+        value.toString(false)
+      else
+        value.toString()
+    .join(' ')
 
 exports.ParameterValue = class ParameterValue
   constructor: (value) ->
     @value = value
     @index = parseInt(value.substr(1), 10) - 1
-  toString: -> "#{@value}"
+  toString: -> "$#{@value}"
 
 exports.ArgumentListValue = class ArgumentListValue
   constructor: (@value, @distinct=false) -> null
@@ -97,6 +114,23 @@ exports.FunctionValue = class FunctionValue
       "#{@name.toUpperCase()}(#{@arguments.toString()})"
     else
       "#{@name.toUpperCase()}()"
+
+exports.Case = class Case
+  constructor: (@whens, @else) ->
+  toString: ->
+    whensStr = @whens.map((w) -> w.toString()).join(' ')
+    if @else
+      "CASE #{whensStr} #{@else.toString()} END"
+    else
+      "CASE #{whensStr} END"
+
+exports.CaseWhen = class CaseWhen
+  constructor: (@whenCondition, @resCondition) ->
+  toString: -> "WHEN #{@whenCondition} THEN #{@resCondition}"
+
+exports.CaseElse = class CaseElse
+  constructor: (@elseCondition) ->
+  toString: -> "ELSE #{@elseCondition}"
 
 exports.Order = class Order
   constructor: (@orderings, @offset) ->

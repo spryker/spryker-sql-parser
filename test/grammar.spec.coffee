@@ -1,5 +1,5 @@
 lexer = require('../lib/lexer')
-parser = require("../lib/parser")
+parser = require('../lib/parser')
 
 parse = (query) ->
   parser.parse(lexer.tokenize(query))
@@ -86,6 +86,12 @@ describe "SQL Grammar", ->
         OFFSET 30
       """
 
+    it "parses SELECTs with FUNCTIONs without arguments", ->
+      parse("SELECT X(Y(Z())) FROM X").toString().should.eql """
+      SELECT X(Y(Z()))
+        FROM `X`
+      """
+
     it "parses SELECTs with FUNCTIONs", ->
       parse("SELECT a, COUNT(1, b) FROM my_table LIMIT 10").toString().should.eql """
       SELECT `a`, COUNT(1, `b`)
@@ -114,6 +120,20 @@ describe "SQL Grammar", ->
         WHERE ((`a` > 10) AND ((`a` < 30) OR (`b` = 'c')))
       """
 
+    it "parses WHERE with REGEXP clauses", ->
+      parse("SELECT * FROM my_table WHERE a > 10 AND b REGEXP '.*' AND c = 4").toString().should.eql """
+      SELECT *
+        FROM `my_table`
+        WHERE (((`a` > 10) AND (`b` REGEXP '.*')) AND (`c` = 4))
+      """
+
+    it "parses WHERE with NOT REGEXP clauses", ->
+      parse("SELECT * FROM my_table WHERE a > 10 AND b NOT REGEXP '.*' AND c = 4").toString().should.eql """
+      SELECT *
+        FROM `my_table`
+        WHERE (((`a` > 10) AND (`b` NOT REGEXP '.*')) AND (`c` = 4))
+      """
+
     it "parses WHERE clauses with BETWEEN operator", ->
       parse("SELECT * FROM my_table WHERE a > 10 AND b BETWEEN 4 AND 6 AND c = 4").toString().should.eql """
       SELECT *
@@ -126,6 +146,13 @@ describe "SQL Grammar", ->
       SELECT *
         FROM `my_table`
         WHERE ((`foo` LIKE '%a') AND (`bar` NOT LIKE 'b%'))
+      """
+
+    it "parses WHERE with ILIKE and NOT ILIKE clauses", ->
+      parse("SELECT * FROM my_table WHERE foo ILIKE '%a' AND bar NOT ILIKE 'b%'").toString().should.eql """
+      SELECT *
+        FROM `my_table`
+        WHERE ((`foo` ILIKE '%a') AND (`bar` NOT ILIKE 'b%'))
       """
 
     it "parses WHERE with ORDER BY clauses", ->
@@ -167,6 +194,13 @@ describe "SQL Grammar", ->
         WHERE (`x` > 1)
         GROUP BY `x`, `y`
         ORDER BY COUNT(`y`) ASC
+      """
+
+    it "parses WHERE with negative numbers and operaions", ->
+      parse("SELECT * FROM my_table WHERE foo < -5 - 4").toString().should.eql """
+      SELECT *
+        FROM `my_table`
+        WHERE (`foo` < (-5 - 4))
       """
 
     it "parses GROUP BY and HAVING clauses", ->
@@ -212,9 +246,9 @@ describe "SQL Grammar", ->
 
     it "supports nested fields using dot syntax", ->
       parse("SELECT a.b.c FROM my_table WHERE a.b > 2").toString().should.eql """
-      SELECT `a.b.c`
+      SELECT `a`.`b`.`c`
         FROM `my_table`
-        WHERE (`a.b` > 2)
+        WHERE (`a`.`b` > 2)
       """
 
     it "supports time window extensions", ->
@@ -246,7 +280,7 @@ describe "SQL Grammar", ->
       SELECT *
         FROM `a`
         JOIN `b`
-          ON (`a.id` = `b.id`)
+          ON (`a`.`id` = `b`.`id`)
       """
 
     it "parses right outer joins", ->
@@ -254,7 +288,7 @@ describe "SQL Grammar", ->
       SELECT *
         FROM `a`
         RIGHT OUTER JOIN `b`
-          ON (`a.id` = `b.id`)
+          ON (`a`.`id` = `b`.`id`)
       """
 
     it "parses multiple joins", ->
@@ -262,18 +296,21 @@ describe "SQL Grammar", ->
       SELECT *
         FROM `a`
         JOIN `b`
-          ON (`a.id` = `b.id`)
+          ON (`a`.`id` = `b`.`id`)
         JOIN `c`
-          ON (`a.id` = `c.id`)
+          ON (`a`.`id` = `c`.`id`)
       """
 
     it "parses UNIONs", ->
-      parse("select * from a union select * from b").toString().should.eql """
+      parse("select * from a union select * from b union select * from c").toString().should.eql """
       SELECT *
         FROM `a`
       UNION
       SELECT *
         FROM `b`
+      UNION
+      SELECT *
+        FROM `c`
       """
 
     it "parses UNION ALL", ->
@@ -293,11 +330,25 @@ describe "SQL Grammar", ->
         WHERE (`foo` = 'I\\'m')
       """
 
+    it "parses single quote", ->
+      parse("select * from a where foo = ''''").toString().should.eql """
+      SELECT *
+        FROM `a`
+        WHERE (`foo` = '''')
+      """
+
     it "allows using double quotes", ->
       parse('select * from a where foo = "a"').toString().should.eql """
       SELECT *
         FROM `a`
         WHERE (`foo` = "a")
+      """
+
+    it "allows using two single quotes", ->
+      parse("select * from a where foo = 'I''m'").toString().should.eql """
+      SELECT *
+        FROM `a`
+        WHERE (`foo` = 'I''m')
       """
 
     it "allows nesting different quote styles", ->
@@ -308,6 +359,15 @@ describe "SQL Grammar", ->
       """
 
   describe "subselect clauses", ->
+    it "parses a subselect field", ->
+      parse("""select (select x from y) from a""").toString().should.eql """
+      SELECT (
+        SELECT `x`
+          FROM `y`
+      )
+        FROM `a`
+      """
+
     it "parses an IN clause containing a list", ->
       parse("""select * from a where x in (1,2,3)""").toString().should.eql """
       SELECT *
@@ -359,7 +419,7 @@ describe "SQL Grammar", ->
       """
 
   describe "STARS", ->
-    it "parses stars as multiplcation", ->
+    it "parses stars as multiplication", ->
       parse('SELECT * FROM foo WHERE a = 1*2').toString().should.eql """
       SELECT *
         FROM `foo`
@@ -374,3 +434,17 @@ describe "SQL Grammar", ->
         WHERE (`bar` = $12)
       """
 
+  describe "functions", ->
+    it "parses function with complex arguments", ->
+      parse('SELECT * FROM foo WHERE bar < DATE_SUB(NOW(), INTERVAL 14 DAYS)').toString().should.eql """
+      SELECT *
+        FROM `foo`
+        WHERE (`bar` < DATE_SUB(NOW(), INTERVAL 14 DAYS))
+      """
+
+  describe "Case When", ->
+    it "parses case when statements", ->
+      parse('select case when foo = \'a\' then a when foo = \'b\' then b else c end from table').toString().should.eql """
+      SELECT CASE WHEN (`foo` = 'a') THEN `a` WHEN (`foo` = 'b') THEN `b` ELSE `c` END
+        FROM `table`
+      """

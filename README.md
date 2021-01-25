@@ -1,6 +1,8 @@
 SQL Parser
 ==========
 
+[![NPM version](https://img.shields.io/npm/v/sql-parser-mistic.svg?style=flat-square)](https://www.npmjs.com/package/sql-parser-mistic)
+
 SQL Parser is a lexer, grammar and parser for SQL written in JS. Currently it is only capable of parsing fairly basic SELECT queries but full SQL support will hopefully come in time. See the specs for examples of currently supported queries.
 
 
@@ -9,12 +11,16 @@ Installation
 
 The package is distributed on NPM and can be installed with...
 
-    npm install sql-parser
+    npm install sql-parser-mistic
+    
+It is also available on Bower :
+
+    bower install sql-parser
 
 To build from source you'll need to run the following from the root of the project...
 
     npm install
-    cake build
+    npm run build
 
 Tests are written using Mocha and can be run with...
 
@@ -47,7 +53,7 @@ Parser
 
 The parser only currently supports SELECT queries but is able to produce a Select object with properties for where, group, order, limit. See lib/nodes.coffee for more info of the returned object structure. Calling .toString() on a Select object should give you back a well formatted version of the original SQL input.
 
-    tokens = lexer.tokenize('select * from my_table where foo = 'bar')
+    tokens = lexer.tokenize("select * from my_table where foo = 'bar'")
     parser.parse(tokens).toString()
 
     SELECT *
