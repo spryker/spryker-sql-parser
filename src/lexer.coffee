@@ -4,6 +4,7 @@ class Lexer
     @preserveWhitespace = opts.preserveWhitespace || false
     @tokens = []
     @currentLine = 1
+    @currentOffset = 0
     i = 0
     while @chunk = sql.slice(i)
       bytesConsumed =  @keywordToken() or
@@ -14,13 +15,13 @@ class Lexer
                        @sortOrderToken() or
                        @seperatorToken() or
                        @operatorToken() or
+                       @numberToken() or
                        @mathToken() or
                        @dotToken() or
                        @conditionalToken() or
                        @betweenToken() or
                        @subSelectOpToken() or
                        @subSelectUnaryOpToken() or
-                       @numberToken() or
                        @stringToken() or
                        @parameterToken() or
                        @parensToken() or
@@ -28,6 +29,7 @@ class Lexer
                        @literalToken()
       throw new Error("NOTHING CONSUMED: Stopped at - '#{@chunk.slice(0,30)}'") if bytesConsumed < 1
       i += bytesConsumed
+      @currentOffset += bytesConsumed
     @token('EOF', '')
     @postProcess()
 
@@ -39,7 +41,13 @@ class Lexer
           token[0] = 'MATH_MULTI'
 
   token: (name, value) ->
-    @tokens.push([name, value, @currentLine])
+    @tokens.push([name, value, @currentLine, @currentOffset])
+
+  tokenizeFromStringRegex: (name, regex, part=0, lengthPart=part, output=true) ->
+    return 0 unless match = regex.exec(@chunk)
+    partMatch = match[part].replace(/''/g, "'")
+    @token(name, partMatch) if output
+    return match[lengthPart].length
 
   tokenizeFromRegex: (name, regex, part=0, lengthPart=part, output=true) ->
     return 0 unless match = regex.exec(@chunk)
@@ -67,6 +75,10 @@ class Lexer
 
   keywordToken: ->
     @tokenizeFromWord('SELECT') or
+    @tokenizeFromWord('INSERT') or
+    @tokenizeFromWord('INTO') or
+    @tokenizeFromWord('DEFAULT') or
+    @tokenizeFromWord('VALUES') or
     @tokenizeFromWord('DISTINCT') or
     @tokenizeFromWord('FROM') or
     @tokenizeFromWord('WHERE') or
@@ -82,6 +94,11 @@ class Lexer
     @tokenizeFromWord('OUTER') or
     @tokenizeFromWord('ON') or
     @tokenizeFromWord('AS') or
+    @tokenizeFromWord('CASE') or
+    @tokenizeFromWord('WHEN') or
+    @tokenizeFromWord('THEN') or
+    @tokenizeFromWord('ELSE') or
+    @tokenizeFromWord('END') or
     @tokenizeFromWord('UNION') or
     @tokenizeFromWord('ALL') or
     @tokenizeFromWord('LIMIT') or
@@ -110,9 +127,9 @@ class Lexer
   seperatorToken:   -> @tokenizeFromRegex('SEPARATOR', SEPARATOR)
   literalToken:     -> @tokenizeFromRegex('LITERAL', LITERAL, 1, 0)
   numberToken:      -> @tokenizeFromRegex('NUMBER', NUMBER)
-  parameterToken:   -> @tokenizeFromRegex('PARAMETER', PARAMETER)
+  parameterToken:   -> @tokenizeFromRegex('PARAMETER', PARAMETER, 1, 0)
   stringToken:      ->
-    @tokenizeFromRegex('STRING', STRING, 1, 0) ||
+    @tokenizeFromStringRegex('STRING', STRING, 1, 0) ||
     @tokenizeFromRegex('DBLSTRING', DBLSTRING, 1, 0)
 
 
@@ -130,9 +147,9 @@ class Lexer
   whitespaceToken: ->
     return 0 unless match = WHITESPACE.exec(@chunk)
     partMatch = match[0]
-    newlines = partMatch.replace(/[^\n]/, '').length
-    @currentLine += newlines
-    @token(name, partMatch) if @preserveWhitespace
+    @token('WHITESPACE', partMatch) if @preserveWhitespace
+    newlines = partMatch.match(/\n/g, '')
+    @currentLine += newlines?.length || 0
     return partMatch.length
 
   regexEscape: (str) ->
@@ -140,24 +157,23 @@ class Lexer
 
   SQL_FUNCTIONS       = ['AVG', 'COUNT', 'MIN', 'MAX', 'SUM']
   SQL_SORT_ORDERS     = ['ASC', 'DESC']
-  SQL_OPERATORS       = ['=', '!=', '>=', '>', '<=', '<>', '<', 'LIKE', 'CONTAINS', 'DOES NOT CONTAIN', 'IS IN', 'IS NOT IN']
-  SUB_SELECT_OP       = ['ANY', 'ALL', 'SOME']
+  SQL_OPERATORS       = ['=', '!=', '>=', '>', '<=', '<>', '<', 'LIKE', 'NOT LIKE', 'ILIKE', 'NOT ILIKE', 'IS NOT', 'IS', 'REGEXP', 'NOT REGEXP']
+  SUB_SELECT_OP       = ['IN', 'NOT IN', 'ANY', 'ALL', 'SOME']
   SUB_SELECT_UNARY_OP = ['EXISTS']
   SQL_CONDITIONALS    = ['AND', 'OR']
   SQL_BETWEENS        = ['BETWEEN', 'NOT BETWEEN']
   BOOLEAN             = ['TRUE', 'FALSE', 'NULL']
-  MATH                = ['+', '-']
+  MATH                = ['+', '-', '||', '&&']
   MATH_MULTI          = ['/', '*']
   STAR                = /^\*/
   SEPARATOR           = /^,/
   WHITESPACE          = /^[ \n\r]+/
-  LITERAL             = /^`?([a-z_\-][a-z0-9_\-]{0,})`?/i
-  PARAMETER           = /^\$[0-9]+/
-  NUMBER              = /^[0-9]+(\.[0-9]+)?/
-  STRING              = /^'([^\\']*(?:\\.[^\\']*)*)'/
+  LITERAL             = /^`?([a-z_][a-z0-9_]{0,}(\:(number|float|string|date|boolean))?)`?/i
+  PARAMETER           = /^\$([a-z0-9_]+(\:(number|float|string|date|boolean))?)/
+  NUMBER              = /^[+-]?[0-9]+(\.[0-9]+)?/
+  STRING              = /^'((?:[^\\']+?|\\.|'')*)'(?!')/
   DBLSTRING           = /^"([^\\"]*(?:\\.[^\\"]*)*)"/
 
 
 
 exports.tokenize = (sql, opts) -> (new Lexer(sql, opts)).tokens
-

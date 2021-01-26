@@ -1,5 +1,17 @@
-{spawn, exec} = require 'child_process'
+spawn = require('cross-spawn')
 fs = require('fs')
+UglifyJS = require('uglify-js')
+require('coffee-script/register')
+pkg = require('./package.json')
+
+header = """
+/*!
+ * SQLParser #{pkg.version}
+ * Copyright 2012-2015 Andy Kent <andy@forward.co.uk>
+ * Copyright 2015-2018 Damien "Mistic" Sorel (https://www.strangeplanet.fr)
+ * Licensed under MIT (http://opensource.org/licenses/MIT)
+ */
+"""
 
 run = (args, cb) ->
   proc =         spawn './node_modules/.bin/coffee', args
@@ -35,6 +47,7 @@ task 'build:browser', 'Build a single JS file suitable for use in the browser', 
       };
     """
   code = """
+    #{header}
     (function(root) {
       var SQLParser = function() {
         function require(path){ return require[path]; }
@@ -48,5 +61,17 @@ task 'build:browser', 'Build a single JS file suitable for use in the browser', 
     }(this));
   """
   fs.writeFileSync './browser/sql-parser.js', code
+
+  invoke 'build:minify'
+
+task 'build:minify', 'Minify the builded JS file suitable for use in the browser', ->
+  minified = UglifyJS.minify './browser/sql-parser.js'
+
+  code = """
+    #{header}
+    #{minified.code}
+  """
+
+  fs.writeFileSync './browser/sql-parser.min.js', code
 
 

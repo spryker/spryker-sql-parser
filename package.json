@@ -1,16 +1,20 @@
 {
-  "name": "sql-parser",
+  "name": "sql-parser-mistic",
   "description": "Lexer and Parser for SQL Syntax",
-  "version": "1.0.0",
-  "scripts": {
-    "test": "./node_modules/.bin/cake build && ./node_modules/.bin/mocha --require should --compilers coffee:coffee-script/register"
-  },
+  "version": "1.2.3",
   "author": {
     "name": "Andy Kent",
     "email": "andy@forward.co.uk"
   },
+  "contributors": [
+    {
+      "name": "Damien \"Mistic\" Sorel",
+      "email": "contact@git.strangeplanet.fr",
+      "url": "https://www.strangeplanet.fr"
+    }
+  ],
   "directories": {
-    "lib" : "./lib"
+    "lib": "./lib"
   },
   "keywords": [
     "sql",
@@ -19,16 +23,21 @@
     "ast"
   ],
   "devDependencies": {
-    "jison": "0.4.15",
     "coffee-script": "1.8.0",
-    "mocha"     : "2.0.1",
-    "should"    : "4.1.0"
+    "cross-spawn": "^6.0.5",
+    "jison": "0.4.15",
+    "mocha": "2.0.1",
+    "should": "4.1.0",
+    "uglify-js": "^2.7.4"
   },
-  "engines": [
-    "node"
-  ],
+  "license": "MIT",
+  "homepage": "https://github.com/mistic100/sql-parser",
   "repository": {
     "type": "git",
     "url": "http://github.com/mistic100/sql-parser.git"
+  },
+  "scripts": {
+    "build": "cake build",
+    "test": "cake build && mocha --require should --compilers coffee:coffee-script/register"
   }
 }
