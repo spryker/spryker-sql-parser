@@ -1,12 +1,17 @@
 {
-  "name": "sql-parser-mistic",
+  "name": "@spryker/sql-parser-mistic",
   "description": "Lexer and Parser for SQL Syntax",
   "version": "1.2.3",
   "author": {
-    "name": "Andy Kent",
-    "email": "andy@forward.co.uk"
+    "name": "Spryker Sytems GmbH",
+    "email": "info@spryker.com",
+    "url": "http://spryker.com"
   },
   "contributors": [
+    {
+      "name": "Andy Kent",
+      "email": "andy@forward.co.uk"
+    },
     {
       "name": "Damien \"Mistic\" Sorel",
       "email": "contact@git.strangeplanet.fr",
@@ -31,10 +36,10 @@
     "uglify-js": "^2.7.4"
   },
   "license": "MIT",
-  "homepage": "https://github.com/mistic100/sql-parser",
+  "homepage": "https://github.com/spryker/spryker-sql-parser",
   "repository": {
     "type": "git",
-    "url": "http://github.com/mistic100/sql-parser.git"
+    "url": "https://github.com/spryker/spryker-sql-parser.git"
   },
   "scripts": {
     "build": "cake build",
