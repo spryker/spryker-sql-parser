@@ -44,5 +44,9 @@
   "scripts": {
     "build": "cake build",
     "test": "cake build && mocha --require should --compilers coffee:coffee-script/register"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
   }
 }

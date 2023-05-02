@@ -157,8 +157,8 @@ class Lexer
 
   SQL_FUNCTIONS       = ['AVG', 'COUNT', 'MIN', 'MAX', 'SUM']
   SQL_SORT_ORDERS     = ['ASC', 'DESC']
-  SQL_OPERATORS       = ['=', '!=', '>=', '>', '<=', '<>', '<', 'LIKE', 'NOT LIKE', 'ILIKE', 'NOT ILIKE', 'IS NOT', 'IS', 'REGEXP', 'NOT REGEXP']
-  SUB_SELECT_OP       = ['IN', 'NOT IN', 'ANY', 'ALL', 'SOME']
+  SQL_OPERATORS       = ['=', '!=', '>=', '>', '<=', '<>', '<', 'LIKE', 'CONTAINS', 'DOES NOT CONTAIN', 'IS IN', 'IS NOT IN']
+  SUB_SELECT_OP       = ['ANY', 'ALL', 'SOME']
   SUB_SELECT_UNARY_OP = ['EXISTS']
   SQL_CONDITIONALS    = ['AND', 'OR']
   SQL_BETWEENS        = ['BETWEEN', 'NOT BETWEEN']
@@ -168,7 +168,7 @@ class Lexer
   STAR                = /^\*/
   SEPARATOR           = /^,/
   WHITESPACE          = /^[ \n\r]+/
-  LITERAL             = /^`?([a-z_][a-z0-9_]{0,}(\:(number|float|string|date|boolean))?)`?/i
+  LITERAL             = /^`?([a-z_\-][a-z0-9_\-]{0,}(\:(number|float|string|date|boolean))?)`?/i
   PARAMETER           = /^\$([a-z0-9_]+(\:(number|float|string|date|boolean))?)/
   NUMBER              = /^[+-]?[0-9]+(\.[0-9]+)?/
   STRING              = /^'((?:[^\\']+?|\\.|'')*)'(?!')/
