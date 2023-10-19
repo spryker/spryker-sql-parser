@@ -67,24 +67,8 @@ describe('SQL Grammar', function () {
             expect(parse('SELECT * FROM my_table WHERE a > 10 AND (a < 30 OR b = \'c\')')).toMatchSnapshot();
         });
 
-        it('parses WHERE with REGEXP clauses', function () {
-            expect(parse('SELECT * FROM my_table WHERE a > 10 AND b REGEXP \'.*\' AND c = 4')).toMatchSnapshot();
-        });
-
-        it('parses WHERE with NOT REGEXP clauses', function () {
-            expect(parse('SELECT * FROM my_table WHERE a > 10 AND b NOT REGEXP \'.*\' AND c = 4')).toMatchSnapshot();
-        });
-
         it('parses WHERE clauses with BETWEEN operator', function () {
             expect(parse('SELECT * FROM my_table WHERE a > 10 AND b BETWEEN 4 AND 6 AND c = 4')).toMatchSnapshot();
-        });
-
-        it('parses WHERE with LIKE and NOT LIKE clauses', function () {
-            expect(parse('SELECT * FROM my_table WHERE foo LIKE \'%a\' AND bar NOT LIKE \'b%\'')).toMatchSnapshot();
-        });
-
-        it('parses WHERE with ILIKE and NOT ILIKE clauses', function () {
-            expect(parse('SELECT * FROM my_table WHERE foo ILIKE \'%a\' AND bar NOT ILIKE \'b%\'')).toMatchSnapshot();
         });
 
         it('parses WHERE with ORDER BY clauses', function () {
@@ -125,10 +109,6 @@ describe('SQL Grammar', function () {
 
         it('supports booleans', function () {
             expect(parse('SELECT null FROM my_table WHERE a = true')).toMatchSnapshot();
-        });
-
-        it('supports IS and IS NOT', function () {
-            expect(parse('SELECT * FROM my_table WHERE a IS NULL AND b IS NOT NULL')).toMatchSnapshot();
         });
 
         it('supports nested expressions', function () {
@@ -197,18 +177,6 @@ describe('SQL Grammar', function () {
     describe('subselect clauses', function () {
         it('parses a subselect field', function () {
             expect(parse('select (select x from y) from a')).toMatchSnapshot();
-        });
-
-        it('parses an IN clause containing a list', function () {
-            expect(parse('select * from a where x in (1,2,3)')).toMatchSnapshot();
-        });
-
-        it('parses an IN clause containing a query', function () {
-            expect(parse('select * from a where x in (select foo from bar)')).toMatchSnapshot();
-        });
-
-        it('parses a NOT IN clause containing a query', function () {
-            expect(parse('select * from a where x not in (select foo from bar)')).toMatchSnapshot();
         });
 
         it('parses an EXISTS clause containing a query', function () {

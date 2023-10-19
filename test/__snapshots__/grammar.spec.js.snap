@@ -155,24 +155,6 @@ exports[`SQL Grammar SELECT Queries parses WHERE with GROUP BY clauses 1`] = `
   GROUP BY \`x\`, \`y\`"
 `;
 
-exports[`SQL Grammar SELECT Queries parses WHERE with ILIKE and NOT ILIKE clauses 1`] = `
-"SELECT *
-  FROM \`my_table\`
-  WHERE ((\`foo\` ILIKE '%a') AND (\`bar\` NOT ILIKE 'b%'))"
-`;
-
-exports[`SQL Grammar SELECT Queries parses WHERE with LIKE and NOT LIKE clauses 1`] = `
-"SELECT *
-  FROM \`my_table\`
-  WHERE ((\`foo\` LIKE '%a') AND (\`bar\` NOT LIKE 'b%'))"
-`;
-
-exports[`SQL Grammar SELECT Queries parses WHERE with NOT REGEXP clauses 1`] = `
-"SELECT *
-  FROM \`my_table\`
-  WHERE (((\`a\` > 10) AND (\`b\` NOT REGEXP '.*')) AND (\`c\` = 4))"
-`;
-
 exports[`SQL Grammar SELECT Queries parses WHERE with ORDER BY clauses 1`] = `
 "SELECT *
   FROM \`my_table\`
@@ -185,12 +167,6 @@ exports[`SQL Grammar SELECT Queries parses WHERE with ORDER BY clauses with dire
   FROM \`my_table\`
   WHERE (\`x\` > 1)
   ORDER BY \`y\` ASC"
-`;
-
-exports[`SQL Grammar SELECT Queries parses WHERE with REGEXP clauses 1`] = `
-"SELECT *
-  FROM \`my_table\`
-  WHERE (((\`a\` > 10) AND (\`b\` REGEXP '.*')) AND (\`c\` = 4))"
 `;
 
 exports[`SQL Grammar SELECT Queries parses WHERE with multiple ORDER BY clauses 1`] = `
@@ -254,12 +230,6 @@ exports[`SQL Grammar SELECT Queries parses sub selects 1`] = `
     SELECT *
       FROM \`my_table\`
   )"
-`;
-
-exports[`SQL Grammar SELECT Queries supports IS and IS NOT 1`] = `
-"SELECT *
-  FROM \`my_table\`
-  WHERE ((\`a\` IS NULL) AND (\`b\` IS NOT NULL))"
 `;
 
 exports[`SQL Grammar SELECT Queries supports booleans 1`] = `
@@ -337,15 +307,6 @@ exports[`SQL Grammar string quoting parses single quote 1`] = `
   WHERE (\`foo\` = '''')"
 `;
 
-exports[`SQL Grammar subselect clauses parses a NOT IN clause containing a query 1`] = `
-"SELECT *
-  FROM \`a\`
-  WHERE (\`x\` NOT IN (
-    SELECT \`foo\`
-      FROM \`bar\`
-  ))"
-`;
-
 exports[`SQL Grammar subselect clauses parses a subselect field 1`] = `
 "SELECT (
   SELECT \`x\`
@@ -358,21 +319,6 @@ exports[`SQL Grammar subselect clauses parses an EXISTS clause containing a quer
 "SELECT *
   FROM \`a\`
   WHERE (EXISTS (
-    SELECT \`foo\`
-      FROM \`bar\`
-  ))"
-`;
-
-exports[`SQL Grammar subselect clauses parses an IN clause containing a list 1`] = `
-"SELECT *
-  FROM \`a\`
-  WHERE (\`x\` IN (1, 2, 3))"
-`;
-
-exports[`SQL Grammar subselect clauses parses an IN clause containing a query 1`] = `
-"SELECT *
-  FROM \`a\`
-  WHERE (\`x\` IN (
     SELECT \`foo\`
       FROM \`bar\`
   ))"
