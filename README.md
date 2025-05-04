@@ -2,6 +2,9 @@ SQL Parser
 ==========
 
 [![NPM version](https://img.shields.io/npm/v/sql-parser-mistic.svg?style=flat-square)](https://www.npmjs.com/package/sql-parser-mistic)
+[![jsDelivr CDN](https://data.jsdelivr.com/v1/package/npm/sql-parser-mistic/badge)](https://www.jsdelivr.com/package/npm/sql-parser-mistic)
+[![GZIP size](https://img.shields.io/bundlephobia/minzip/sql-parser-mistic?label=gzip%20size)](https://bundlephobia.com/result?p=sql-parser-mistic)
+[![Build Status](https://github.com/mistic100/sql-parser/workflows/CI/badge.svg)](https://github.com/mistic100/sql-parser/actions)
 
 SQL Parser is a lexer, grammar and parser for SQL written in JS. Currently it is only capable of parsing fairly basic SELECT queries but full SQL support will hopefully come in time. See the specs for examples of currently supported queries.
 
@@ -12,15 +15,11 @@ Installation
 The package is distributed on NPM and can be installed with...
 
     npm install sql-parser-mistic
-    
-It is also available on Bower :
-
-    bower install sql-parser
 
 To build from source you'll need to run the following from the root of the project...
 
     npm install
-    npm run build
+    npm run compile
 
 Tests are written using Mocha and can be run with...
 
@@ -59,12 +58,6 @@ The parser only currently supports SELECT queries but is able to produce a Selec
     SELECT *
       FROM `my_table`
       WHERE `foo` = 'bar'
-
-
-Credits
--------
-
-A lot of the boilerplate and compilation code in this project is borrowed from the CoffeeScript project as it was the best example of a project using JISON that I could find. Thanks.
 
 
 Contributions
